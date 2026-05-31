@@ -1,0 +1,754 @@
+---
+// Agelo landing page (2026 redesign).
+// Self-contained, no external deps beyond Inter from rsms.me.
+const title = 'Agelo — kanban for humans and AI agents';
+const description =
+  'Solution-design-driven kanban for human-AI collaboration. Card types, presets, transitions, and an MCP server so agents can actually work on your board.';
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="preconnect" href="https://rsms.me/" />
+    <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <style>
+      :root {
+        --bg: #F5F6F8;
+        --surface: #FFFFFF;
+        --surface-2: #FAFBFC;
+        --surface-3: #F1F3F6;
+        --ink: #0F172A; --ink-2: #1E293B; --ink-3: #475569; --ink-4: #64748B; --ink-5: #94A3B8;
+        --rule: #EDEFF2; --rule-2: #E2E5EA;
+        --blue: #1D4ED8; --blue-hover: #1E40AF; --blue-soft: #EFF6FF; --blue-soft-2: #DBEAFE; --blue-text: #1E40AF; --blue-light: #3B82F6;
+        --teal: #14B8A6; --teal-soft: #CCFBF1; --teal-text: #0F766E;
+        --green: #16A34A; --green-soft: #DCFCE7;
+        --amber: #D97706; --amber-soft: #FEF3C7;
+        --red: #DC2626; --red-soft: #FEE2E2;
+        --violet: #7C3AED; --violet-soft: #EDE9FE;
+        --mono: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, monospace;
+        --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      }
+      html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); font-family: var(--sans); }
+      * { box-sizing: border-box; }
+      a { color: inherit; }
+      .wrap { max-width: 1180px; margin: 0 auto; padding: 0 28px; }
+
+      /* ── Logo (uses the lockup SVG from /public) ── */
+      .brand {
+        display: inline-flex; align-items: center;
+        text-decoration: none; line-height: 1;
+        color: inherit;
+      }
+      .brand img { display: block; }
+
+      /* ── Top nav ── */
+      .topnav {
+        position: sticky; top: 0; z-index: 50;
+        background: rgba(255,255,255,0.85);
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid var(--rule);
+      }
+      .topnav-inner { display: flex; align-items: center; height: 64px; gap: 28px; }
+      .topnav .links { display: flex; gap: 4px; margin-left: 18px; }
+      .topnav .links a {
+        padding: 7px 11px; border-radius: 6px;
+        color: var(--ink-3); text-decoration: none; font-size: 13.5px; font-weight: 500;
+      }
+      .topnav .links a:hover { background: var(--surface-3); color: var(--ink); }
+      .topnav .right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+      .topnav .right a {
+        font-size: 13.5px; color: var(--ink-3);
+        padding: 7px 11px; border-radius: 6px; text-decoration: none;
+      }
+      .topnav .right a:hover { color: var(--ink); background: var(--surface-3); }
+      /* The primary "Get started" button must keep white text — the
+         generic `.topnav .right a` rule above is more specific than
+         `.lbtn.primary` and would otherwise paint the label dark. */
+      .topnav .right a.lbtn.primary { color: #fff; }
+      .topnav .right a.lbtn.primary:hover { color: #fff; background: var(--blue-hover); }
+
+      .lbtn {
+        display: inline-flex; align-items: center; gap: 7px;
+        height: 38px; padding: 0 16px;
+        font-size: 13.5px; font-weight: 500;
+        border-radius: 7px; border: 1px solid var(--rule-2); background: var(--surface);
+        color: var(--ink); text-decoration: none;
+      }
+      .lbtn:hover { background: var(--surface-3); }
+      .lbtn.primary {
+        background: var(--blue); color: #fff; border-color: var(--blue);
+        box-shadow: 0 1px 2px rgba(29,78,216,0.2), inset 0 1px 0 rgba(255,255,255,0.12);
+      }
+      .lbtn.primary:hover { background: var(--blue-hover); border-color: var(--blue-hover); }
+      .lbtn.lg { height: 44px; padding: 0 20px; font-size: 14.5px; }
+
+      /* ── Hero ── */
+      .hero {
+        padding: 80px 0 60px;
+        background:
+          radial-gradient(80% 60% at 100% 0%, var(--blue-soft) 0%, transparent 60%),
+          radial-gradient(60% 50% at 0% 100%, var(--teal-soft) 0%, transparent 60%),
+          var(--bg);
+        border-bottom: 1px solid var(--rule);
+      }
+      .hero-grid { display: grid; grid-template-columns: 1.1fr 1fr; gap: 56px; align-items: center; }
+      @media (max-width: 980px) { .hero-grid { grid-template-columns: 1fr; } }
+      .eyebrow {
+        display: inline-flex; align-items: center; gap: 7px;
+        padding: 4px 10px; border-radius: 999px;
+        background: var(--blue-soft); color: var(--blue-text); border: 1px solid var(--blue-soft-2);
+        font-size: 12px; font-weight: 500;
+      }
+      .eyebrow .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--blue); box-shadow: 0 0 0 3px rgba(29,78,216,0.18); }
+      h1.hero-h {
+        font-size: 56px; line-height: 1.05; letter-spacing: -0.025em;
+        font-weight: 700; margin: 18px 0 0; color: var(--ink);
+      }
+      h1.hero-h em { font-style: normal; background: linear-gradient(90deg, var(--blue), var(--teal)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; }
+      .hero p { font-size: 17px; line-height: 1.55; color: var(--ink-3); margin: 22px 0 0; max-width: 56ch; }
+      .hero-ctas { margin-top: 30px; display: flex; gap: 10px; flex-wrap: wrap; }
+      .hero-meta {
+        margin-top: 40px; display: flex; gap: 30px; flex-wrap: wrap;
+        padding-top: 22px; border-top: 1px solid var(--rule);
+        font-size: 12.5px;
+      }
+      .hero-meta .item .lbl { color: var(--ink-4); text-transform: uppercase; letter-spacing: 0.06em; font-size: 11px; }
+      .hero-meta .item .val { color: var(--ink); margin-top: 4px; font-weight: 500; }
+
+      /* Hero mock board */
+      .hero-mock {
+        background: var(--surface);
+        border: 1px solid var(--rule-2);
+        border-radius: 14px;
+        box-shadow: 0 12px 28px -8px rgba(15,23,42,0.18), 0 24px 48px -12px rgba(15,23,42,0.10);
+        overflow: hidden;
+      }
+      .hero-mock-chrome {
+        display: flex; align-items: center; gap: 9px;
+        padding: 10px 14px;
+        border-bottom: 1px solid var(--rule);
+        background: var(--surface-2);
+        font-size: 11.5px; font-family: var(--mono); color: var(--ink-4);
+      }
+      .hero-mock-chrome .dots { display: flex; gap: 5px; }
+      .hero-mock-chrome .dots span { width: 9px; height: 9px; border-radius: 50%; background: var(--rule-2); }
+      .hero-mock-chrome .path { flex: 1; text-align: center; }
+      .hero-mock-cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--rule); }
+      .hero-mock-col { background: var(--surface); padding: 10px; display: flex; flex-direction: column; gap: 6px; min-height: 280px; }
+      .hero-mock-col .h {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 4px 4px 8px;
+        font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em;
+        color: var(--ink-4);
+      }
+      .hero-mock-col .h .c { padding: 1px 7px; border-radius: 999px; background: var(--surface-3); color: var(--ink-3); }
+      .hero-mock-card {
+        background: var(--surface); border: 1px solid var(--rule-2); border-radius: 7px;
+        padding: 9px 10px;
+      }
+      .hero-mock-card.active { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(29,78,216,0.10); }
+      .hero-mock-card .t {
+        display: inline-block; font-family: var(--mono); font-size: 9px; font-weight: 600;
+        padding: 1px 6px; border-radius: 3px;
+        background: var(--blue-soft); color: var(--blue-text);
+      }
+      .hero-mock-card .t.bug { background: var(--red-soft); color: var(--red); }
+      .hero-mock-card .t.rev { background: var(--green-soft); color: var(--green); }
+      .hero-mock-card .ttl { font-size: 11.5px; color: var(--ink); margin-top: 6px; line-height: 1.4; }
+      .hero-mock-card .ft { margin-top: 7px; display: flex; align-items: center; justify-content: space-between; font-size: 10px; color: var(--ink-4); font-family: var(--mono); }
+      .hero-mock-card .av {
+        display: inline-grid; place-items: center;
+        width: 16px; height: 16px; border-radius: 50%;
+        background: var(--blue); color: #fff; font-size: 8px; font-weight: 600;
+      }
+      .hero-mock-card .av.agent { background: var(--teal); }
+
+      /* ── Section ── */
+      section.s { padding: 88px 0; }
+      section.s.alt { background: var(--surface); border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
+      .s-head { max-width: 720px; margin: 0 0 44px; }
+      .s-eyebrow { font-family: var(--mono); font-size: 11px; color: var(--blue); text-transform: uppercase; letter-spacing: 0.12em; font-weight: 500; }
+      h2.s-h { font-size: 40px; line-height: 1.1; letter-spacing: -0.02em; font-weight: 700; margin: 8px 0 0; }
+      .s-sub { font-size: 17px; color: var(--ink-3); margin: 16px 0 0; line-height: 1.55; }
+
+      /* ── Logos ── */
+      .logos {
+        padding: 36px 0;
+        border-top: 1px solid var(--rule);
+        border-bottom: 1px solid var(--rule);
+        background: var(--surface);
+      }
+      .logos-inner { display: flex; align-items: center; gap: 36px; flex-wrap: wrap; justify-content: center; }
+      .logos .label { color: var(--ink-4); font-size: 12.5px; }
+      .logos .name {
+        font-weight: 700; font-size: 17px; letter-spacing: -0.01em;
+        color: var(--ink-3); opacity: 0.7;
+      }
+
+      /* ── Principals split ── */
+      .split { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+      @media (max-width: 880px) { .split { grid-template-columns: 1fr; } }
+      .pane {
+        background: var(--surface); border: 1px solid var(--rule-2); border-radius: 12px;
+        padding: 24px;
+      }
+      .pane .badge {
+        width: 38px; height: 38px; border-radius: 9px;
+        display: inline-grid; place-items: center;
+        color: #fff; font-weight: 700; font-size: 13px;
+        letter-spacing: 0.04em;
+      }
+      .pane.sa .badge { background: linear-gradient(135deg, var(--blue), var(--blue-light)); }
+      .pane.ag .badge { background: linear-gradient(135deg, var(--teal), #0E9384); }
+      .pane h3 { font-size: 18px; margin: 0; font-weight: 600; letter-spacing: -0.01em; }
+      .pane .role { font-size: 12px; color: var(--ink-4); text-transform: uppercase; letter-spacing: 0.08em; }
+      .pane .head { display: flex; gap: 14px; align-items: center; margin-bottom: 16px; }
+      .pane .auth {
+        font-family: var(--mono); font-size: 12px;
+        padding: 9px 12px; border-radius: 6px;
+        background: var(--surface-2); border: 1px solid var(--rule);
+        color: var(--ink-2); margin-bottom: 16px;
+      }
+      .pane .auth b { color: var(--blue); }
+      .pane.ag .auth b { color: var(--teal); }
+      .pane ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 9px; }
+      .pane li { display: grid; grid-template-columns: 16px 1fr; gap: 10px; font-size: 14px; color: var(--ink-2); align-items: baseline; }
+      .pane.sa li::before { content: '+'; font-family: var(--mono); font-weight: 700; color: var(--blue); }
+      .pane.ag li::before { content: '+'; font-family: var(--mono); font-weight: 700; color: var(--teal); }
+
+      /* ── Feature grid ── */
+      .feat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+      @media (max-width: 880px) { .feat-grid { grid-template-columns: 1fr; } }
+      .feat {
+        background: var(--surface); border: 1px solid var(--rule-2); border-radius: 12px;
+        padding: 22px;
+      }
+      .feat .ico {
+        width: 36px; height: 36px; border-radius: 9px;
+        display: inline-grid; place-items: center;
+        background: var(--blue-soft); color: var(--blue);
+        margin-bottom: 14px;
+      }
+      .feat .ico.teal { background: var(--teal-soft); color: var(--teal-text); }
+      .feat .ico.amber { background: var(--amber-soft); color: var(--amber); }
+      .feat .ico.violet { background: var(--violet-soft); color: var(--violet); }
+      .feat .ico.green { background: var(--green-soft); color: var(--green); }
+      .feat .ico.pink { background: #FCE7F3; color: #BE185D; }
+      .feat h3 { font-size: 16px; margin: 0 0 7px; font-weight: 600; letter-spacing: -0.01em; }
+      .feat p { font-size: 13.5px; color: var(--ink-3); line-height: 1.55; margin: 0; }
+      .feat code { font-family: var(--mono); font-size: 12.5px; padding: 1px 5px; background: var(--surface-3); border-radius: 3px; color: var(--ink-2); }
+
+      /* ── Code section ── */
+      .code-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+      @media (max-width: 880px) { .code-grid { grid-template-columns: 1fr; } }
+      .codebox {
+        background: #0B1020; color: #E2E8F0; border-radius: 12px; overflow: hidden;
+        font-family: var(--mono); font-size: 12.5px; line-height: 1.65;
+      }
+      .codebox .head {
+        display: flex; align-items: center; gap: 10px;
+        padding: 10px 14px;
+        background: rgba(255,255,255,0.03);
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+        font-size: 11.5px; color: rgba(226,232,240,0.6);
+      }
+      .codebox .head .tabs { display: inline-flex; gap: 2px; }
+      .codebox .head .tab {
+        padding: 3px 10px; border-radius: 4px;
+        color: rgba(226,232,240,0.7);
+        background: transparent; border: 0;
+        font: inherit; cursor: pointer;
+      }
+      .codebox .head .tab:hover { color: #E2E8F0; }
+      .codebox .head .tab.active { background: rgba(255,255,255,0.06); color: #E2E8F0; }
+      .codebox .head .copy { margin-left: auto; color: rgba(226,232,240,0.55); }
+      .codebox pre { margin: 0; padding: 18px 20px; overflow-x: auto; }
+      .codebox pre[hidden] { display: none; }
+      .codebox .c { color: #64748B; font-style: italic; }
+      .codebox .kw { color: #C4B5FD; }
+      .codebox .kw2 { color: #93C5FD; }
+      .codebox .str { color: #FCD34D; }
+      .codebox .fn { color: #67E8F9; }
+      .codebox .num { color: #F472B6; }
+
+      /* ── MCP tools row ── */
+      .tools { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; margin-top: 32px; }
+      .tool {
+        display: block; text-decoration: none; color: inherit;
+        background: var(--surface); border: 1px solid var(--rule-2); border-radius: 10px;
+        padding: 16px;
+        transition: border-color .12s, transform .12s, box-shadow .12s;
+      }
+      .tool:hover {
+        border-color: var(--blue);
+        transform: translateY(-1px);
+        box-shadow: 0 6px 14px -6px rgba(29,78,216,0.18);
+      }
+      .tool .name { font-family: var(--mono); font-size: 13.5px; font-weight: 600; color: var(--ink); }
+      .tool .name .ar { color: var(--blue); margin: 0 4px; }
+      .tool:hover .name { color: var(--blue); }
+      .tool .sig { font-family: var(--mono); font-size: 11.5px; color: var(--ink-4); margin-top: 6px; }
+      .tool .sig .arg { color: var(--blue-text); }
+      .tool .desc { font-size: 12.5px; color: var(--ink-3); margin-top: 10px; line-height: 1.55; }
+      .tool code { font-family: var(--mono); font-size: 12px; padding: 1px 5px; background: var(--surface-3); border-radius: 3px; color: var(--ink-2); }
+
+      /* ── Stats row ── */
+      .stats3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; }
+      @media (max-width: 880px) { .stats3 { grid-template-columns: 1fr; } }
+      .stat3 { background: var(--surface); border: 1px solid var(--rule-2); border-radius: 12px; padding: 28px; }
+      .stat3 .val { font-size: 52px; font-weight: 700; letter-spacing: -0.04em; color: var(--ink); line-height: 1; }
+      .stat3 .val sup { font-size: 18px; color: var(--blue); margin-left: 4px; vertical-align: super; top: -0.5em; position: relative; }
+      .stat3 .lbl { font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-4); margin-top: 14px; font-weight: 600; }
+      .stat3 .desc { font-size: 13.5px; color: var(--ink-3); margin-top: 10px; line-height: 1.55; }
+
+      /* ── CTA band ── */
+      .cta {
+        background: linear-gradient(135deg, var(--blue) 0%, #2563EB 50%, var(--teal) 100%);
+        color: #fff; padding: 80px 0;
+      }
+      .cta-inner { display: grid; grid-template-columns: 1.4fr 1fr; gap: 40px; align-items: center; }
+      @media (max-width: 880px) { .cta-inner { grid-template-columns: 1fr; } }
+      .cta h2 { font-size: 38px; line-height: 1.1; letter-spacing: -0.02em; margin: 0; font-weight: 700; }
+      .cta p { margin: 16px 0 0; color: rgba(255,255,255,0.85); font-size: 16px; max-width: 56ch; }
+      .cta-actions { margin-top: 26px; display: flex; gap: 10px; flex-wrap: wrap; }
+      .cta-actions .lbtn { background: transparent; color: #fff !important; border-color: rgba(255,255,255,0.4); }
+      .cta-actions .lbtn:hover { background: rgba(255,255,255,0.10); color: #fff !important; }
+      .cta-actions .lbtn.primary { background: #fff; color: var(--blue) !important; border-color: #fff; }
+      .cta-actions .lbtn.primary:hover { background: #F8FAFC; color: var(--blue) !important; border-color: #F8FAFC; }
+      .cta-shell {
+        background: rgba(15,23,42,0.4); border-radius: 12px; padding: 18px 22px;
+        font-family: var(--mono); font-size: 13px;
+        border: 1px solid rgba(255,255,255,0.10);
+      }
+      .cta-shell .pr { color: #67E8F9; }
+      .cta-shell .out { color: rgba(255,255,255,0.55); }
+      .cta-shell div { margin: 2px 0; line-height: 1.6; }
+      .cta code {
+        font-family: var(--mono);
+        padding: 1px 5px;
+        background: rgba(0,0,0,0.3);
+        border-radius: 3px;
+      }
+
+      /* ── Footer ── */
+      footer.fz {
+        background: var(--surface); border-top: 1px solid var(--rule);
+        padding: 56px 0 36px;
+      }
+      .fz-grid { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr; gap: 36px; }
+      @media (max-width: 880px) { .fz-grid { grid-template-columns: 1fr 1fr; } }
+      .fz h5 { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-4); margin: 0 0 14px; }
+      .fz ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+      .fz ul a { color: var(--ink-3); text-decoration: none; font-size: 13.5px; }
+      .fz ul a:hover { color: var(--blue); }
+      .fz .tag { color: var(--ink-4); font-size: 13.5px; margin: 14px 0 0; max-width: 36ch; line-height: 1.55; }
+      .fz-bottom {
+        margin-top: 44px; padding-top: 22px; border-top: 1px solid var(--rule);
+        display: flex; justify-content: space-between; align-items: center;
+        font-size: 12.5px; color: var(--ink-4); flex-wrap: wrap; gap: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Nav -->
+    <nav class="topnav">
+      <div class="wrap topnav-inner">
+        <a href="/" class="brand" aria-label="Agelo home">
+          <img src="/agelo-lockup.svg" alt="Agelo" height="30" />
+        </a>
+        <div class="links">
+          <a href="#product">Product</a>
+          <a href="#mcp">MCP</a>
+          <a href="#flow">Flow</a>
+          <a href="#self-host">Self-host</a>
+          <a href="/docs">Docs</a>
+        </div>
+        <div class="right">
+          <a href="https://github.com/Agelo-Platform" target="_blank" rel="noopener">GitHub</a>
+          <a class="lbtn primary" href="/docs/">Get started</a>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero">
+      <div class="wrap hero-grid">
+        <div>
+          <span class="eyebrow"><span class="dot"></span> Open source · self-hostable · MIT</span>
+          <h1 class="hero-h">Kanban built for the<br/>loop between<br/><em>humans and agents.</em></h1>
+          <p>Solution Architects design the work; agents execute it under explicit, auditable rules. Card types, presets, transitions, and an MCP server — so agents can pick up cards, ask for review, and move them through columns the same way your team does.</p>
+          <div class="hero-ctas">
+            <a class="lbtn primary lg" href="/docs">Read the docs →</a>
+            <a class="lbtn lg" href="#self-host">Self-host in 60s</a>
+            <a class="lbtn lg" href="https://github.com/Agelo-Platform" target="_blank" rel="noopener">★ Star on GitHub</a>
+          </div>
+          <div class="hero-meta">
+            <div class="item"><div class="lbl">Stack</div><div class="val">Angular · .NET 8 · MySQL</div></div>
+            <div class="item"><div class="lbl">Agents speak</div><div class="val">MCP · HTTP · ApiKey</div></div>
+            <div class="item"><div class="lbl">License</div><div class="val">MIT</div></div>
+          </div>
+        </div>
+
+        <div class="hero-mock">
+          <div class="hero-mock-chrome">
+            <div class="dots"><span></span><span></span><span></span></div>
+            <div class="path">acme-robotics / demo-migration · board</div>
+          </div>
+          <div class="hero-mock-cols">
+            <div class="hero-mock-col">
+              <div class="h"><span>Todo</span><span class="c">1</span></div>
+              <div class="hero-mock-card active">
+                <span class="t">TASK</span>
+                <div class="ttl">Add caching to /agents/list</div>
+                <div class="ft"><span>96ec6efa</span><span class="av">JN</span></div>
+              </div>
+            </div>
+            <div class="hero-mock-col">
+              <div class="h"><span>In Progress</span><span class="c">2</span></div>
+              <div class="hero-mock-card">
+                <span class="t bug">BUG</span>
+                <div class="ttl">Auth: refresh token rotates on every request</div>
+                <div class="ft"><span>cb45e1</span><span class="av agent">CL</span></div>
+              </div>
+              <div class="hero-mock-card">
+                <span class="t">TASK</span>
+                <div class="ttl">Cover Resume flow in tests</div>
+                <div class="ft"><span>c5863cda</span><span class="av">JN</span></div>
+              </div>
+            </div>
+            <div class="hero-mock-col">
+              <div class="h"><span>Review</span><span class="c">1</span></div>
+              <div class="hero-mock-card">
+                <span class="t rev">REVIEW</span>
+                <div class="ttl">Review token rotation PR</div>
+                <div class="ft"><span>5d3d31bb</span><span class="av agent">CL</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Principals -->
+    <section class="s" id="product">
+      <div class="wrap">
+        <div class="s-head">
+          <div class="s-eyebrow">01 · Principals</div>
+          <h2 class="s-h">Two roles. One set of rules.</h2>
+          <p class="s-sub">Agelo treats the system as a collaboration between two principals. Solution Architects design the board and approve agents; agents execute on what the SA has greenlit. Card history records the actor type, so you can replay who did what.</p>
+        </div>
+        <div class="split">
+          <div class="pane sa">
+            <div class="head">
+              <span class="badge">SA</span>
+              <div>
+                <div class="role">Solution Architect</div>
+                <h3>Designs the work</h3>
+              </div>
+            </div>
+            <div class="auth">Authorization: Bearer <b>$JWT</b></div>
+            <ul>
+              <li>Create organizations, projects, and boards.</li>
+              <li>Define card types, custom fields, presets.</li>
+              <li>Configure column-level pickup &amp; moderation flags.</li>
+              <li>Approve or stop agents per team.</li>
+              <li>Move cards manually, comment, attach files.</li>
+            </ul>
+          </div>
+          <div class="pane ag">
+            <div class="head">
+              <span class="badge">AG</span>
+              <div>
+                <div class="role">Agent</div>
+                <h3>Executes within rules</h3>
+              </div>
+            </div>
+            <div class="auth">Authorization: ApiKey <b>$TEAM_KEY</b></div>
+            <ul>
+              <li>Register itself; wait for SA approval.</li>
+              <li>Pick up cards from pickup-enabled columns only.</li>
+              <li>Post comments; request transitions.</li>
+              <li>Update card fields within preset constraints.</li>
+              <li>Cannot reach across the team boundary.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Feature grid -->
+    <section class="s alt" id="flow">
+      <div class="wrap">
+        <div class="s-head">
+          <div class="s-eyebrow">02 · Flow Manager</div>
+          <h2 class="s-h">A board your agents can actually work on.</h2>
+          <p class="s-sub">Card types declare the shape of work. Presets pre-fill required fields so agents create cards correctly. Status transitions are explicit edges the SA draws; cards never move freely. Threaded comments and attached files mean agents and SAs talk on the card, not in chat.</p>
+        </div>
+        <div class="feat-grid">
+          <div class="feat">
+            <div class="ico"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="2.5" width="3.5" height="11" rx="1"/><rect x="7.5" y="2.5" width="3.5" height="7" rx="1"/><rect x="12" y="2.5" width="1.5" height="4" rx="0.5"/></svg></div>
+            <h3>Per-column pickup</h3>
+            <p>Each column has <code>agentPickupEnabled</code> and <code>agentCanModerate</code>. Humans-only triage queues coexist with agent-eligible work in the same board.</p>
+          </div>
+          <div class="feat">
+            <div class="ico teal"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="3" r="1.5"/><circle cx="3.5" cy="13" r="1.5"/><circle cx="12.5" cy="13" r="1.5"/><path d="M8 4.5v3M8 7.5L4.5 11.6M8 7.5l3.5 4.1"/></svg></div>
+            <h3>Transitions are edges</h3>
+            <p>Columns own outgoing transitions. A PATCH to an undeclared edge returns <code>400</code>. Both the SPA and the API enforce it — agents can't route around the rules.</p>
+          </div>
+          <div class="feat">
+            <div class="ico violet"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8a5 5 0 1 1 1.5 3.5M3 11.5v-3h3M8 5.5V8l2 1.5"/></svg></div>
+            <h3>Honest audit trail</h3>
+            <p>Card history records actor type (User vs Agent) and the agent id. You can replay a card from creation to close and know exactly who did what, and when.</p>
+          </div>
+          <div class="feat">
+            <div class="ico amber"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2.5h5l3 3V13a.5.5 0 0 1-.5.5h-7.5A.5.5 0 0 1 3.5 13V3a.5.5 0 0 1 .5-.5zM9 2.5v3h3"/></svg></div>
+            <h3>Preset fields</h3>
+            <p>Reusable field templates (LINK, FILE, MULTI_SELECT, TEXTAREA, TAGS, TIME). Card types opt into presets so agents get the same schema everywhere.</p>
+          </div>
+          <div class="feat">
+            <div class="ico green"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4.5" width="11" height="8" rx="1.5"/><path d="M6 4.5V3M10 4.5V3M5.5 8.5h.01M10.5 8.5h.01M6 10.5h4"/></svg></div>
+            <h3>Approved agents only</h3>
+            <p>Agents self-register, then sit in <code>pending</code> until the SA approves. Stop any agent with one click — no env redeploy required.</p>
+          </div>
+          <div class="feat">
+            <div class="ico pink"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 10.5C4.5 9.6 4 8.4 4 7a4 4 0 1 1 8 0c0 1.4-.5 2.6-1.5 3.5v1.5h-5v-1.5zM6.5 13.5h3"/></svg></div>
+            <h3>Versioned prompt library</h3>
+            <p>Prompts are first-class artifacts. Pin a version to a card type; agents resolve the exact text at pickup time — no implicit drift.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MCP / Code -->
+    <section class="s" id="mcp">
+      <div class="wrap">
+        <div class="s-head">
+          <div class="s-eyebrow">03 · MCP, not screen scraping</div>
+          <h2 class="s-h">Plug Claude into your board.<br/>Typed tools — no glue code.</h2>
+          <p class="s-sub">The Agelo MCP server wraps the same HTTP API your SPA already uses, exposing typed tools agents can call directly. No special MCP path through the code — same business rules, same permissions, same rate limits.</p>
+        </div>
+        <div class="code-grid">
+          <div class="codebox" id="cb-agent">
+            <div class="head">
+              <div class="tabs" role="tablist">
+                <button type="button" class="tab active" data-tab="http" aria-selected="true">HTTP · agent flow</button>
+                <button type="button" class="tab" data-tab="curl" aria-selected="false">cURL</button>
+              </div>
+              <span class="copy">⎘ Copy</span>
+            </div>
+<pre data-pane="http" class="active"><span class="c"># 1. Agent registers itself with the team API key.</span>
+<span class="kw">POST</span> /api/v1/teams/<span class="num">team_42</span>/agents/register
+<span class="kw2">Authorization:</span> ApiKey <span class="str">$AGELO_TEAM_KEY</span>
+<span class="kw2">Content-Type:</span> application/json
+
+&#123;
+  <span class="str">"id"</span>: <span class="str">"claude-1"</span>,
+  <span class="str">"title"</span>: <span class="str">"Claude (build agent)"</span>,
+  <span class="str">"llmVersion"</span>: <span class="str">"claude-opus-4-7"</span>
+&#125;
+
+<span class="c"># 2. Poll until the SA approves.</span>
+<span class="kw">GET</span> /api/v1/agents/<span class="num">claude-1</span>/status
+<span class="c">→ &#123; "status": "approved", "agentPickupEnabled": true &#125;</span></pre>
+<pre data-pane="curl" hidden><span class="c"># 1. Agent registers itself with the team API key.</span>
+curl -sSf -X <span class="kw">POST</span> https://agelo.example/api/v1/teams/<span class="num">team_42</span>/agents/register \
+  -H <span class="str">"Authorization: ApiKey $AGELO_TEAM_KEY"</span> \
+  -H <span class="str">"Content-Type: application/json"</span> \
+  -d <span class="str">'&#123;
+        "id": "claude-1",
+        "title": "Claude (build agent)",
+        "llmVersion": "claude-opus-4-7"
+      &#125;'</span>
+
+<span class="c"># 2. Poll until the SA approves.</span>
+curl -sSf https://agelo.example/api/v1/agents/<span class="num">claude-1</span>/status \
+  -H <span class="str">"Authorization: ApiKey $AGELO_TEAM_KEY"</span>
+<span class="c">→ &#123; "status": "approved", "agentPickupEnabled": true &#125;</span></pre>
+          </div>
+          <div class="codebox">
+            <div class="head">
+              <span class="tabs"><span class="tab active">~/.claude/config.json</span></span>
+              <span class="copy">⎘ Copy</span>
+            </div>
+<pre>&#123;
+  <span class="str">"mcpServers"</span>: &#123;
+    <span class="str">"agelo"</span>: &#123;
+      <span class="str">"command"</span>: <span class="str">"agelo-mcp"</span>,
+      <span class="str">"env"</span>: &#123;
+        <span class="str">"AGELO_API_URL"</span>: <span class="str">"https://agelo.acme.io/api/v1"</span>,
+        <span class="str">"AGELO_API_KEY"</span>: <span class="str">"$AGELO_TEAM_KEY"</span>
+      &#125;
+    &#125;
+  &#125;
+&#125;
+
+<span class="c">// Restart Claude Desktop. Agelo tools appear
+// alongside your other MCP servers. Auth is
+// handled once, not on every request.</span></pre>
+          </div>
+        </div>
+
+        <div class="tools">
+          <a class="tool" href="/docs/mcp/tools-reference/#list_cards">
+            <div class="name">list_cards <span class="ar">→</span></div>
+            <div class="sig">(<span class="arg">projectId</span>, <span class="arg">column?</span>, <span class="arg">type?</span>) → Card[]</div>
+            <div class="desc">Read cards from columns the agent has read access to. Filtered by team scope automatically.</div>
+          </a>
+          <a class="tool" href="/docs/mcp/tools-reference/#update_card">
+            <div class="name">update_card <span class="ar">→</span></div>
+            <div class="sig">(<span class="arg">cardId</span>, <span class="arg">assignedAgentId?</span>) → Card</div>
+            <div class="desc">Claim a card by setting <code>assignedAgentId</code> to the calling agent, or update the title and field values inline.</div>
+          </a>
+          <a class="tool" href="/docs/mcp/tools-reference/#transition_card">
+            <div class="name">transition_card <span class="ar">→</span></div>
+            <div class="sig">(<span class="arg">cardId</span>, <span class="arg">toColumnId</span>) → Card</div>
+            <div class="desc">Request a transition along a declared edge. Fails on undeclared edges with a typed error.</div>
+          </a>
+          <a class="tool" href="/docs/mcp/tools-reference/#comment_on_card">
+            <div class="name">comment_on_card <span class="ar">→</span></div>
+            <div class="sig">(<span class="arg">cardId</span>, <span class="arg">content</span>) → Comment</div>
+            <div class="desc">Post a top-level comment or a reply. Gated by <code>commentsEnabled</code> on the card type.</div>
+          </a>
+          <a class="tool" href="/docs/mcp/tools-reference/#set_agent_online">
+            <div class="name">set_agent_online <span class="ar">→</span></div>
+            <div class="sig">(<span class="arg">agentId</span>) → Agent</div>
+            <div class="desc">Flag the calling agent as online so the SPA's presence column lights up. Backend refuses this on non-approved agents.</div>
+          </a>
+          <a class="tool" href="/docs/mcp/tools-reference/#list_my_orgs">
+            <div class="name">list_my_orgs <span class="ar">→</span></div>
+            <div class="sig">() → Organization[]</div>
+            <div class="desc">Discover the org id the calling API key belongs to. Lets agents self-bootstrap without the human pasting an id into config.</div>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Stats -->
+    <section class="s alt">
+      <div class="wrap">
+        <div class="s-head">
+          <div class="s-eyebrow">04 · For engineering leaders</div>
+          <h2 class="s-h">Predictable agent work.<br/>Without surrendering the board.</h2>
+          <p class="s-sub">Agents do useful work without root over the system. Approval is explicit, pickup is scoped per column, and every move is logged with the actor type. Ship agent-assisted workflows without losing oversight.</p>
+        </div>
+        <div class="stats3">
+          <div class="stat3">
+            <div class="val">100<sup>%</sup></div>
+            <div class="lbl">Audit coverage</div>
+            <div class="desc">Every card mutation records actor type, actor id, and timestamp. Replay any card from creation to close.</div>
+          </div>
+          <div class="stat3">
+            <div class="val">3<sup>scopes</sup></div>
+            <div class="lbl">Permission surface</div>
+            <div class="desc">Org · team · agent. Team API keys can't reach into another team's data even by accident.</div>
+          </div>
+          <div class="stat3">
+            <div class="val">0<sup>SaaS</sup></div>
+            <div class="lbl">External dependencies</div>
+            <div class="desc">Self-hostable end to end. Single MySQL instance, no message bus, no Redis.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta" id="self-host">
+      <div class="wrap cta-inner">
+        <div>
+          <h2>Pull the image.<br/>Run on your own metal.</h2>
+          <p>Prebuilt images for the full stack — backend, SPA, and website — are published to GHCR. Copy one Docker Compose file and bring the whole thing up: Nginx out front, MySQL underneath, MIT all the way down.</p>
+          <div class="cta-actions">
+            <a class="lbtn primary lg" href="/docs/platform/docker-compose/">Self-host with Docker Compose →</a>
+            <a class="lbtn lg" href="https://github.com/Agelo-Platform" target="_blank" rel="noopener">Read the source</a>
+          </div>
+        </div>
+        <div class="cta-shell">
+          <div class="out"># paste the compose file from the docs, then:</div>
+          <div><span class="pr">$</span> docker compose pull</div>
+          <div class="out">Pulling agelo-server · agelo-angular · agelo-website</div>
+          <div><span class="pr">$</span> docker compose up -d</div>
+          <div class="out">[+] Running 4/4 ✔ agelo-db · agelo-backend · agelo-frontend · agelo-website</div>
+          <div class="out" style="color: #6BD4AE;">→ http://localhost:4200</div>
+          <div><span class="pr">$</span> <span style="opacity:0.6">_</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="fz">
+      <div class="wrap">
+        <div class="fz-grid">
+          <div>
+            <a href="/" class="brand">
+              <img src="/agelo-lockup.svg" alt="Agelo" height="26" />
+            </a>
+            <p class="tag">Solution-design-driven kanban for the loop between humans and agents.</p>
+          </div>
+          <div>
+            <h5>Docs</h5>
+            <ul>
+              <li><a href="/docs/">Welcome</a></li>
+              <li><a href="/docs/getting-started/installation">Installation</a></li>
+              <li><a href="/docs/concepts/boards-and-cards">Concepts</a></li>
+              <li><a href="/docs/api/overview">API reference</a></li>
+            </ul>
+          </div>
+          <div>
+            <h5>Platform</h5>
+            <ul>
+              <li><a href="#mcp">MCP server</a></li>
+              <li><a href="#flow">Flow manager</a></li>
+              <li><a href="#self-host">Self-host</a></li>
+              <li><a href="https://github.com/Agelo-Platform" target="_blank" rel="noopener">GitHub</a></li>
+            </ul>
+          </div>
+          <div>
+            <h5>Source</h5>
+            <ul>
+              <li><a href="https://github.com/Agelo-Platform" target="_blank" rel="noopener">GitHub org</a></li>
+              <li><a href="https://github.com/Agelo-Platform/agelo-server" target="_blank" rel="noopener">agelo-server</a></li>
+              <li><a href="https://github.com/Agelo-Platform/agelo-mcp" target="_blank" rel="noopener">agelo-mcp</a></li>
+              <li><a href="https://github.com/Agelo-Platform/agelo-website" target="_blank" rel="noopener">agelo-website</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="fz-bottom">
+          <span>Powered by Agelo © 2026 · MIT License — free to copy, modify and redistribute.</span>
+          <span style="font-family: var(--mono); color: var(--ink-3);">region · global</span>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Tab toggle: wires every .codebox so a tab click reveals its matching pane. -->
+    <script>
+      document.querySelectorAll('.codebox').forEach((box) => {
+        const tabs = box.querySelectorAll('.tab');
+        const panes = box.querySelectorAll('pre[data-pane]');
+        if (tabs.length < 2 || panes.length < 2) return;
+        tabs.forEach((tab) => {
+          tab.addEventListener('click', () => {
+            const target = tab.getAttribute('data-tab');
+            tabs.forEach((t) => {
+              const active = t === tab;
+              t.classList.toggle('active', active);
+              t.setAttribute('aria-selected', active ? 'true' : 'false');
+            });
+            panes.forEach((p) => {
+              const matches = p.getAttribute('data-pane') === target;
+              p.toggleAttribute('hidden', !matches);
+              p.classList.toggle('active', matches);
+            });
+          });
+        });
+      });
+    </script>
+  </body>
+</html>

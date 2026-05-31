@@ -1,0 +1,127 @@
+/* Agelo design tokens (2026 redesign) — applied on top of Starlight.
+ *
+ * Palette:
+ *   royal blue  #1D4ED8  (primary)
+ *   navy ink    #0F172A
+ *   teal accent #14B8A6
+ *
+ * Starlight has its own accent ramp (--sl-color-accent-low/-/-high). We
+ * point it at the new blue so links, the active sidebar item and the
+ * cmd-K search highlight all pick up the new identity automatically.
+ */
+
+:root {
+  --agelo-blue: #1D4ED8;
+  --agelo-blue-soft: #EFF6FF;
+  --agelo-blue-text: #1E40AF;
+  --agelo-teal: #14B8A6;
+  --agelo-teal-soft: #CCFBF1;
+  --agelo-ink: #0F172A;
+  --agelo-ink-3: #475569;
+  --agelo-ink-4: #64748B;
+}
+
+/* ── Light theme overrides ─────────────────────────────────────────── */
+:root[data-theme='light'] {
+  --sl-color-accent-low: var(--agelo-blue-soft);
+  --sl-color-accent: var(--agelo-blue);
+  --sl-color-accent-high: #1E3A8A;
+  --sl-color-text-accent: var(--agelo-blue);
+
+  --sl-color-bg: #F5F6F8;
+  --sl-color-bg-nav: rgba(255, 255, 255, 0.85);
+  --sl-color-bg-sidebar: #FFFFFF;
+  --sl-color-bg-inline-code: #F1F3F6;
+
+  --sl-color-text: #0F172A;
+  --sl-color-text-invert: #FFFFFF;
+  --sl-color-gray-1: #1E293B;
+  --sl-color-gray-2: #475569;
+  --sl-color-gray-3: #64748B;
+  --sl-color-gray-4: #CBD5E1;
+  --sl-color-gray-5: #E2E5EA;
+  --sl-color-gray-6: #EDEFF2;
+  --sl-color-gray-7: #F1F3F6;
+
+  --sl-color-hairline: #EDEFF2;
+  --sl-color-hairline-light: #E2E5EA;
+  --sl-color-hairline-shade: #E2E5EA;
+
+  --sl-font-system:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --sl-font-system-mono:
+    ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+/* ── Dark theme overrides ──────────────────────────────────────────── */
+:root[data-theme='dark'] {
+  --sl-color-accent-low: rgba(29, 78, 216, 0.18);
+  --sl-color-accent: #60A5FA;
+  --sl-color-accent-high: #DBEAFE;
+  --sl-color-text-accent: #93C5FD;
+
+  --sl-color-bg: #0B1220;
+  --sl-color-bg-nav: rgba(15, 23, 42, 0.85);
+  --sl-color-bg-sidebar: #0F172A;
+  --sl-color-bg-inline-code: #1F2937;
+
+  --sl-color-text: #F1F5F9;
+  --sl-color-gray-1: #E2E8F0;
+  --sl-color-gray-2: #CBD5E1;
+  --sl-color-gray-3: #94A3B8;
+  --sl-color-gray-4: #475569;
+  --sl-color-gray-5: #334155;
+  --sl-color-gray-6: #1F2937;
+  --sl-color-gray-7: #0F172A;
+
+  --sl-color-hairline: #1F2937;
+  --sl-color-hairline-light: #1F2937;
+  --sl-color-hairline-shade: #374151;
+}
+
+/* ── Wordmark in the docs top nav — match SPA's "ag" + "elo" gradient ── */
+.site-title__brand,
+.site-title {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+/* The "agelo" wordmark gradient — Starlight renders the title as plain
+ * text; this targets the title link via attribute selector so a small
+ * tweak inline (no extra wrapper needed). */
+header .site-title,
+nav.sidebar .site-title {
+  background: none;
+  color: var(--sl-color-text);
+}
+
+/* ── Tighter prose width for readability + nicer code blocks ───────── */
+.sl-markdown-content {
+  max-width: 78ch;
+}
+.sl-markdown-content :not(pre) > code {
+  border: 1px solid var(--sl-color-gray-5);
+  border-radius: 4px;
+  padding: 1px 6px;
+  font-size: 0.9em;
+}
+
+/* ── Sidebar active item gets a soft blue background (matches SPA) ── */
+:root[data-theme='light'] .sidebar-content a[aria-current='page'],
+:root[data-theme='light'] .sidebar-content a[aria-current='true'] {
+  background-color: var(--agelo-blue-soft);
+  color: var(--agelo-blue);
+  border-radius: 6px;
+}
+
+/* ── Pretty primary CTA buttons (used on Starlight's link-card etc.) ── */
+.sl-markdown-content a.button,
+.sl-markdown-content .button {
+  background: var(--agelo-blue);
+  color: #fff;
+  border-radius: 7px;
+  padding: 8px 14px;
+}
+.sl-markdown-content a.button:hover {
+  background: #1E40AF;
+}
