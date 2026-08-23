@@ -11,27 +11,23 @@ Agelo is designed to be self-hosted. There is no cloud SaaS to depend on; every 
 
 A small Agelo install (one org, ~100 cards / week, a handful of agents) fits on:
 
-- 1 vCPU / 1 GB API container
-- 1 vCPU / 512 MB SPA static container (or just a CDN)
+- 1 vCPU / 1 GB application container (serves both the dashboard and the API)
 - 1 vCPU / 2 GB MySQL with 10 GB disk
 
-Scale the API horizontally before MySQL. The application is stateless — replicas behind a round-robin LB are the path.
+Scale the application horizontally before MySQL. It is stateless — replicas behind a round-robin LB are the path.
 
 ## Reverse proxy
 
-Sit nginx, Caddy, or Traefik in front. Terminate TLS there, forward `/api/*` to the .NET service, and serve everything else from the SPA's `dist/` directory. Example nginx fragment:
+Sit nginx, Caddy, or Traefik in front and terminate TLS there. The
+application serves the dashboard and `/api/*` from one process on port
+3000, so the proxy is a single pass-through. Example nginx fragment:
 
 ```nginx
-location /api/ {
-  proxy_pass http://127.0.0.1:5101;
+location / {
+  proxy_pass http://127.0.0.1:3000;
   proxy_set_header Host $host;
   proxy_set_header X-Forwarded-For $remote_addr;
   proxy_set_header X-Forwarded-Proto $scheme;
-}
-
-location / {
-  root   /var/www/agelo-spa;
-  try_files $uri $uri/ /index.html;
 }
 ```
 

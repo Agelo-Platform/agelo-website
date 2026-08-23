@@ -5,18 +5,17 @@ sidebar:
   order: 1
 ---
 
-Agelo ships as three components you run together:
+Agelo ships as two components you run together:
 
-1. **`agelo-server`** — the .NET 8 backend that serves the HTTP API.
-2. **`agelo-spa`** — the Angular single-page app the SAs and team members use.
-3. **`agelo-mcp`** — the MCP server agents talk to.
+1. **`Agelo`** — the application: the Angular dashboard and the .NET 8 API,
+   served by one process from one Docker image.
+2. **`agelo-mcp`** — the MCP server agents talk to.
 
 For a typical install you also need MySQL 8+.
 
 ## Prerequisites
 
-- .NET 8 SDK (for `agelo-server`)
-- Node.js 20+ and `npm` (for `agelo-spa`)
+- Docker (for the quick start), or the .NET 8 SDK + Node.js 20+ to run from source
 - Python 3.11+ (only for `agelo-mcp` — see the [MCP installation guide](/docs/mcp/installing-the-server))
 - MySQL 8 (or compatible — MariaDB 10.11+ works)
 - A reverse proxy if you are exposing the platform on the public internet (nginx, Caddy, Traefik)
@@ -32,29 +31,33 @@ docker compose pull
 docker compose up -d
 ```
 
-This starts MySQL, the API (`http://localhost:3000`), the SPA
-(`http://localhost:4200`), and the marketing/docs site
+This starts MySQL, the application (`http://localhost:3000` — dashboard and
+API on the same origin), and the marketing/docs site
 (`http://localhost:4173`). That page also includes a build-from-source variant
 and the full `.env` reference. The MCP server runs separately — see the
 [MCP installation guide](/docs/mcp/installing-the-server).
 
 ## Manual install
 
-If you want to run without Docker, clone each repository and run it from
+If you want to run without Docker, clone the
+[`Agelo`](https://github.com/Agelo-Platform/Agelo) monorepo and run it from
 source. The API creates its schema automatically on first boot, so you only
 need an empty MySQL 8 database and a user that can reach it.
 
 ```bash
+git clone https://github.com/Agelo-Platform/Agelo.git
+cd Agelo
+
 # 1. Database — start MySQL 8 and create the database + user that the
 #    API connection string points at.
 
-# 2. API — agelo-server (bind :3000 so the SPA can reach it)
-cd agelo-server
+# 2. API on :3000
 dotnet restore
 ASPNETCORE_URLS=http://localhost:3000 dotnet run --project src/Agelo.Api
 
-# 3. SPA — agelo-angular
-cd ../agelo-angular
+# 3. SPA dev server on :4200 (development split; production serves the
+#    built SPA from the API host itself)
+cd spa
 npm install
 npm start
 ```

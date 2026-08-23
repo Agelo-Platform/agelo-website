@@ -61,7 +61,7 @@ Pin a specific build with a tag:
 docker pull ghcr.io/agelo-platform/agelo-website:0.0.1.0
 ```
 
-For the full Agelo stack (backend + database + SPA + website) follow the
+For the full Agelo stack (app + database + website) follow the
 [Run with Docker Compose](https://agelo.app/docs/platform/docker-compose/)
 guide.
 

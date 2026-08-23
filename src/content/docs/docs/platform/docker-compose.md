@@ -1,19 +1,19 @@
 ---
 title: Run with Docker Compose
-description: Self-host the full Agelo stack with Docker Compose — from prebuilt GHCR images or built from source.
+description: Self-host the full Agelo stack with Docker Compose — from the prebuilt GHCR image or built from source.
 sidebar:
   order: 6
 ---
 
-The whole Agelo stack — API, SPA, marketing/docs site, and MySQL — runs from a
-single Docker Compose file. There is no separate `local-compose` repository to
-clone; just copy one of the files below into a folder and run it.
+The whole Agelo stack — the application (UI + API in **one image**), the
+marketing/docs site, and MySQL — runs from a single Docker Compose file.
+Just copy one of the files below into a folder and run it.
 
 Two flavours are provided:
 
 - **From GHCR** — pull the prebuilt images. This is the fastest path and what
   most self-hosters want.
-- **From source** — build the images yourself from the three repositories.
+- **From source** — build the images yourself from the repositories.
   Use this when you're modifying Agelo or want to pin to your own fork.
 
 :::caution[Change the defaults before exposing this publicly]
@@ -25,8 +25,8 @@ putting Agelo on a network you don't fully control, set a strong
 
 ## Option A — from GHCR (recommended)
 
-Every component is published to `ghcr.io/agelo-platform/*`. Create a folder,
-drop in the two files below, and start the stack.
+The application is published to `ghcr.io/agelo-platform/agelo`. Create a
+folder, drop in the two files below, and start the stack.
 
 Save this as `docker-compose.yml`:
 
@@ -51,9 +51,9 @@ services:
       timeout: 5s
       retries: 20
 
-  agelo-backend:
-    image: ghcr.io/agelo-platform/agelo-server:${IMAGE_TAG:-latest}
-    container_name: agelo-backend
+  agelo:
+    image: ghcr.io/agelo-platform/agelo:${IMAGE_TAG:-latest}
+    container_name: agelo
     depends_on:
       agelo-db:
         condition: service_healthy
@@ -61,7 +61,6 @@ services:
       ConnectionStrings__Default: "Server=agelo-db;Port=3306;Database=${MYSQL_DATABASE:-agelo};User=${MYSQL_USER:-agelo};Password=${MYSQL_PASSWORD:-agelo};"
       ASPNETCORE_ENVIRONMENT: Production
       ASPNETCORE_URLS: http://+:3000
-      Cors__Origins: ${CORS_ORIGINS:-http://localhost:4200,http://127.0.0.1:4200}
       # In-house JWT (HMAC HS256) used by /auth/login. CHANGE THIS.
       Jwt__Secret: ${JWT_SECRET:-change-me-32-bytes-minimum-secret}
       Jwt__Issuer: ${JWT_ISSUER:-agelo}
@@ -72,16 +71,6 @@ services:
       Sa__BootstrapPassword: ${SA_PASSWORD:-Architect#1}
     ports:
       - "3000:3000"
-
-  agelo-frontend:
-    image: ghcr.io/agelo-platform/agelo-angular:${IMAGE_TAG:-latest}
-    container_name: agelo-frontend
-    depends_on:
-      - agelo-backend
-    environment:
-      API_BASE_URL: ${API_BASE_URL:-http://localhost:3000/api/v1}
-    ports:
-      - "4200:80"
 
   agelo-website:
     image: ghcr.io/agelo-platform/agelo-website:${IMAGE_TAG:-latest}
@@ -106,18 +95,17 @@ docker compose up -d
 To pin a specific build instead of `latest`:
 
 ```bash
-IMAGE_TAG=0.0.1.0 docker compose up -d
+IMAGE_TAG=0.2.0 docker compose up -d
 ```
 
 ## Option B — from source
 
-Clone the three repositories as siblings, then add the compose file next to
+Clone the repositories as siblings, then add the compose file next to
 them. The build contexts are relative paths, so the layout matters:
 
 ```text
 agelo/
-├── agelo-server/        # git clone https://github.com/Agelo-Platform/agelo-server
-├── agelo-angular/       # git clone https://github.com/Agelo-Platform/agelo-angular
+├── Agelo/               # git clone https://github.com/Agelo-Platform/Agelo
 ├── agelo-website/       # git clone https://github.com/Agelo-Platform/agelo-website
 └── docker-compose.yml   # the file below
 ```
@@ -145,11 +133,11 @@ services:
       timeout: 5s
       retries: 20
 
-  agelo-backend:
+  agelo:
     build:
-      context: ./agelo-server
+      context: ./Agelo
       dockerfile: Dockerfile
-    container_name: agelo-backend
+    container_name: agelo
     depends_on:
       agelo-db:
         condition: service_healthy
@@ -157,7 +145,6 @@ services:
       ConnectionStrings__Default: "Server=agelo-db;Port=3306;Database=${MYSQL_DATABASE:-agelo};User=${MYSQL_USER:-agelo};Password=${MYSQL_PASSWORD:-agelo};"
       ASPNETCORE_ENVIRONMENT: Production
       ASPNETCORE_URLS: http://+:3000
-      Cors__Origins: ${CORS_ORIGINS:-http://localhost:4200,http://127.0.0.1:4200}
       Jwt__Secret: ${JWT_SECRET:-change-me-32-bytes-minimum-secret}
       Jwt__Issuer: ${JWT_ISSUER:-agelo}
       Jwt__Audience: ${JWT_AUDIENCE:-agelo-spa}
@@ -166,20 +153,6 @@ services:
       Sa__BootstrapPassword: ${SA_PASSWORD:-Architect#1}
     ports:
       - "3000:3000"
-
-  agelo-frontend:
-    build:
-      context: ./agelo-angular
-      dockerfile: Dockerfile
-      args:
-        API_BASE_URL: ${API_BASE_URL:-http://localhost:3000/api/v1}
-    container_name: agelo-frontend
-    depends_on:
-      - agelo-backend
-    environment:
-      API_BASE_URL: ${API_BASE_URL:-http://localhost:3000/api/v1}
-    ports:
-      - "4200:80"
 
   agelo-website:
     build:
@@ -211,13 +184,9 @@ MYSQL_DATABASE=agelo
 MYSQL_USER=agelo
 MYSQL_PASSWORD=change-me-db
 
-# --- Backend ---
+# --- Application ---
 # 32+ byte random string. Generate one: openssl rand -base64 48
 JWT_SECRET=change-me-32-bytes-minimum-secret
-# Comma-separated origins the SPA is served from.
-CORS_ORIGINS=http://localhost:4200
-# Where the SPA reaches the API. Use your public URL behind a proxy.
-API_BASE_URL=http://localhost:3000/api/v1
 
 # --- Bootstrap Solution Architect (first boot only) ---
 SA_EMAIL=architect@agelo.local
@@ -231,17 +200,18 @@ IMAGE_TAG=latest
 | --- | --- | --- |
 | `MYSQL_*` | `agelo` / `rootpw` | Database name and credentials. |
 | `JWT_SECRET` | dev placeholder | HMAC key signing SA login tokens. **Must change.** |
-| `CORS_ORIGINS` | `localhost:4200` | Origins allowed to call the API. |
-| `API_BASE_URL` | `localhost:3000/api/v1` | URL the SPA + agents reach the API at. |
 | `SA_EMAIL` / `SA_PASSWORD` | `architect@agelo.local` | Bootstrap Solution Architect, seeded once. |
 | `IMAGE_TAG` | `latest` | GHCR image tag (Option A only). |
+
+The UI and the API share one origin, so no CORS or API-URL configuration is
+needed — the SPA simply calls `/api/v1` on the host that served it.
 
 ## After it boots
 
 | Service | URL |
 | --- | --- |
-| SPA (dashboard) | `http://localhost:4200` |
-| API (Swagger at `/api/docs`) | `http://localhost:3000` |
+| Agelo (dashboard + API) | `http://localhost:3000` |
+| Swagger | `http://localhost:3000/api/docs` |
 | Marketing + docs site | `http://localhost:4173` |
 | MySQL | `localhost:3306` |
 
@@ -264,7 +234,6 @@ Before exposing Agelo beyond your laptop:
 - [ ] Set a strong `SA_PASSWORD` and change it again from **Settings → Security** after first login.
 - [ ] Replace the MySQL passwords and don't publish port `3306` to the internet.
 - [ ] Put a TLS-terminating reverse proxy in front — see [Self-hosting](/docs/platform/self-hosting/) for an nginx example.
-- [ ] Narrow `CORS_ORIGINS` to the exact origin(s) your SPA is served from.
 
 ## Upgrading (GHCR)
 

@@ -29,7 +29,7 @@ The server reads two environment variables:
 
 | Variable | Purpose |
 | --- | --- |
-| `AGELO_API_URL` | Base URL of your `agelo-server` API (e.g. `https://agelo.example.com/api/v1`). |
+| `AGELO_API_URL` | Base URL of your Agelo API (e.g. `https://agelo.example.com/api/v1`). |
 | `AGELO_API_KEY` | The team-scoped API key the server should use. Issue one from **Settings → API keys**. |
 
 You can also pass them on the command line: `agelo-mcp --api-url https://… --api-key ag_ak_…`.
@@ -64,4 +64,4 @@ Install the wheel for a newer release tag over the top:
 pip install --upgrade https://github.com/Agelo-Platform/agelo-mcp/releases/download/<newer-tag>/agelo_mcp-<newer-version>-py3-none-any.whl
 ```
 
-The MCP tool surface is **versioned alongside the platform**: `agelo-mcp` 0.4.x talks to `agelo-server` 0.4.x. Mismatched majors will refuse to start.
+The MCP tool surface is **versioned alongside the platform**: `agelo-mcp` 0.4.x talks to Agelo 0.4.x. Mismatched majors will refuse to start.

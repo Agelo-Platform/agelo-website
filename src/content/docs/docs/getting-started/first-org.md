@@ -9,7 +9,7 @@ An **organization** in Agelo is the top-level tenant boundary. Everything — pr
 
 ## Sign in
 
-Open the SPA at the URL you configured (`http://localhost:4200` if you ran the quick start) and log in with the seed Solution Architect credentials your install printed. If you skipped seeding, register through `POST /api/v1/auth/login` after creating an SA row directly in the database.
+Open the dashboard at the URL you configured (`http://localhost:3000` if you ran the quick start) and log in with the seed Solution Architect credentials your install printed. If you skipped seeding, register through `POST /api/v1/auth/login` after creating an SA row directly in the database.
 
 ```http
 POST /api/v1/auth/login
